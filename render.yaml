@@ -1,10 +1,10 @@
-# This Blueprint uses PAID compute/database plans to stay available through judging.
-# Review Render's displayed prices and available hackathon credits before creating.
+# FREE initial preview. Database expires after 30 days and web service sleeps.
+# Before judging, arrange lasting storage/compute; see render.judging.yaml.
 services:
   - type: web
     name: batchbridge
     runtime: node
-    plan: 0.5c-512mb
+    plan: free
     region: singapore
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
@@ -21,9 +21,9 @@ services:
       - key: SESSION_SECRET
         generateValue: true
       - key: ADMIN_EMAIL
-        sync: false
+        value: merchant@example.invalid
       - key: ADMIN_PASSWORD
-        sync: false
+        generateValue: true
       - key: DEMO_MODE
         value: true
       - key: AI_PROVIDER
@@ -31,25 +31,24 @@ services:
       - key: MAX_AI_CALLS_PER_HOUR
         value: 30
       - key: HF_TOKEN
-        sync: false
+        value: ""
       - key: HF_MODEL
-        sync: false
+        value: ""
       - key: ELASTICSEARCH_URL
-        sync: false
+        value: ""
       - key: ELASTICSEARCH_API_KEY
-        sync: false
+        value: ""
       - key: ELASTICSEARCH_INDEX
         value: batchbridge-inquiries
       - key: PAYPAL_CLIENT_ID
-        sync: false
+        value: ""
       - key: PAYPAL_CLIENT_SECRET
-        sync: false
+        value: ""
       - key: PAYPAL_MERCHANT_ID
-        sync: false
+        value: ""
 databases:
   - name: batchbridge-db
-    plan: 0.1c-256mb
-    diskSizeGB: 1
+    plan: free
     region: singapore
     databaseName: batchbridge
     user: batchbridge

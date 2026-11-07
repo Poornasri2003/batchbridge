@@ -17,7 +17,7 @@ Open http://localhost:3001 and click **Open demo workspace**. Sample inventory, 
 
 ## Deploy
 
-Read **START-HERE.md** for account setup and exact Render steps. The included `render.yaml` provisions a Node web service and PostgreSQL with paid plans. Review Render's prices/credits before applying. HF can be used for AI inference while Render hosts the application. The Dockerfile supports alternative container hosting, including Hugging Face Docker Spaces with external PostgreSQL and HTTPS APP_URL.
+Read **START-HERE.md** for account setup and exact Render steps. The included `render.yaml` provisions a free initial Node/PostgreSQL preview with unconfigured external services. Its database expires in 30 days. `render.judging.yaml` is a paid-plan configuration intended for availability through judging; review prices and credits before applying it. HF can be used for AI inference while Render hosts the application. The Dockerfile supports alternative container hosting, including Hugging Face Docker Spaces with external PostgreSQL and HTTPS APP_URL.
 
 ## AI provider
 
@@ -61,6 +61,8 @@ npm run providers
 `npm test` uses fake PayPal responses and local HTTP/SQLite checks. Those tests do not establish live API success. `npm run providers` sends a live AI request and indexes/queries fictional records in Elastic if configured. It can consume provider credits. A real sandbox buyer checkout is still required to validate PayPal end-to-end. A PostgreSQL adapter check is available via `npm run test:postgres` when `TEST_DATABASE_URL` points to a disposable test database.
 
 See `VALIDATION.md` for actual checks run in this session and remaining verification.
+
+The optional GitHub Actions workflow is at `ci/github-actions.yml`. The current GitHub login could publish code but lacked workflow-writing permission, so it was deliberately not activated. A repository owner with the necessary permission can copy it to `.github/workflows/check.yml`; no permission expansion is needed to run tests locally.
 
 ## Tools actually implemented
 
