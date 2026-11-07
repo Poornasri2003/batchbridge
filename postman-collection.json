@@ -1,0 +1,194 @@
+{
+  "info": {
+    "name": "BatchBridge — qualification and approval",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Run in order. Uses fictional sample records. No private keys belong in this collection. PayPal checkout is a separate explicit browser step. Collection has not been executed in Postman unless VALIDATION.md says otherwise."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001" },
+    { "key": "workspace", "value": "" },
+    { "key": "quoteToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/healthz" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Server ready', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Open isolated demo (cookie jar)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{}" },
+        "url": "{{baseUrl}}/api/demo"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Workspace created', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Inspect state",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/state" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Has stock', () => pm.expect(pm.response.json().inventory.length).to.be.greaterThan(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Qualify sample enquiries (local mode)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"lotId\":\"kraft-300\",\"mode\":\"local\"}"
+        },
+        "url": "{{baseUrl}}/api/search"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const c = pm.response.json().candidates;",
+              "pm.test('200-unit request passes', () => pm.expect(c.find(x => x.id === 'north').qualification.verdict).to.eql('PASS'));",
+              "pm.test('500-unit request fails', () => pm.expect(c.find(x => x.id === 'oak').qualification.verdict).to.eql('FAIL'));",
+              "pm.test('Unknown certification holds', () => pm.expect(c.find(x => x.id === 'morrow').qualification.verdict).to.eql('HOLD'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Reject below-floor price",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"lotId\":\"kraft-300\",\"inquiryId\":\"north\",\"unitCents\":1}"
+        },
+        "url": "{{baseUrl}}/api/quotes"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Price rejected', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Issue approved merchant quote",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"lotId\":\"kraft-300\",\"inquiryId\":\"north\",\"unitCents\":80}"
+        },
+        "url": "{{baseUrl}}/api/quotes"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Quote issued', () => pm.response.to.have.status(201));",
+              "const url = pm.response.json().url;",
+              "pm.collectionVariables.set('workspace', decodeURIComponent(url.match(/[?&]workspace=([^&]+)/)[1]));",
+              "pm.collectionVariables.set('quoteToken', decodeURIComponent(url.match(/[?&]quote=([^&]+)/)[1]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Reject changed customer total",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"approved\":true,\"totalCents\":1}"
+        },
+        "url": "{{baseUrl}}/api/quote/{{workspace}}/{{quoteToken}}/approve"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Amount tampering rejected', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Approve exact quote",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"approved\":true,\"totalCents\":17200}"
+        },
+        "url": "{{baseUrl}}/api/quote/{{workspace}}/{{quoteToken}}/approve"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Exact total approved', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Read customer quote",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/quote/{{workspace}}/{{quoteToken}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Total computed server-side', () => pm.expect(pm.response.json().quote.totalCents).to.eql(17200));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
