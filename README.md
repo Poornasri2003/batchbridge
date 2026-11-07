@@ -2,6 +2,8 @@
 
 Match surplus packaging stock to customer enquiries, review the evidence, issue an exact quote, and complete a PayPal sandbox checkout.
 
+**Live preview:** https://batchbridge-5e6h.onrender.com — choose Open demo workspace. Hosted PostgreSQL, sample qualification, quoting and customer approval have been verified. AI, Elastic and PayPal still need credentials and live verification. This free preview database expires after 30 days.
+
 ## Start locally
 
 Node.js 24 LTS recommended (minimum 22.13). No Python, model download, or GPU required.

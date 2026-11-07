@@ -2,6 +2,8 @@
 
 The app code is built. To enable live services, you need your own accounts. Do not send passwords, payment details or API secrets in chat.
 
+**Your preview is deployed:** https://batchbridge-5e6h.onrender.com. Click Open demo workspace. Source is at https://github.com/Poornasri2003/batchbridge. Hosting setup below is retained for reference; do not create duplicate Render resources. Add keys to the existing service's Environment settings instead.
+
 ## Recommended setup
 
 - **Render** hosts the Node app and PostgreSQL database.
@@ -10,7 +12,7 @@ The app code is built. To enable live services, you need your own accounts. Do n
 - **PayPal sandbox** performs test checkout with no real money.
 - **GitHub** stores public source code and feeds deployments.
 
-This setup does not need a GPU server. A Hugging Face Space can also host the supplied Docker image, but it still needs persistent external PostgreSQL, environment secrets and a canonical public APP_URL. Render is the primary tested-target configuration, not a verified deployment yet.
+This setup does not need a GPU server. A Hugging Face Space can also host the supplied Docker image, but it still needs persistent external PostgreSQL, environment secrets and a canonical public APP_URL. Render's public preview and PostgreSQL basic reads/writes have been verified; live AI, Elastic and payment credentials remain to be configured and tested.
 
 ## Step 1 — try the local app
 
